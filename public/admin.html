@@ -1,0 +1,182 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Portal Panitia & Election Authority - E-Voting Kripto</title>
+  <link rel="stylesheet" href="/css/style.css">
+</head>
+<body>
+  <header>
+    <a href="/" class="brand">
+      <span>🛡️</span>
+      <div>
+        Portal Panitia (Election Authority)
+        <div class="sub">Kendali Parameter, Kunci EA, & Tally Homomorfik</div>
+      </div>
+    </a>
+    <nav>
+      <a href="/">Beranda</a>
+      <a href="/admin.html" class="active">Panel Panitia</a>
+      <a href="/ballots.html">Ballot Box</a>
+      <a href="/results.html">Hasil Pemilu</a>
+      <a href="/lab.html">Lab Kripto</a>
+      <button id="btn-admin-logout" class="btn btn-secondary btn-sm" style="display: none;">Keluar (Logout)</button>
+    </nav>
+    <div>
+      <span class="status-badge" id="current-state-badge">MEMUAT...</span>
+    </div>
+  </header>
+
+  <!-- Login Guard Card (Tampil jika belum login panitia) -->
+  <div id="admin-login-guard" style="display: flex; justify-content: center; align-items: center; min-height: 60vh; padding: 2rem;">
+    <div class="card" style="max-width: 440px; width: 100%; border-color: #8b5cf6; box-shadow: 0 20px 25px -5px rgba(0,0,0,0.5);">
+      <div class="card-title" style="color: #a78bfa; font-size: 1.25rem;">
+        <span>🔐 Otentikasi Panitia Pemilihan</span>
+      </div>
+      <p style="font-size: 0.85rem; color: var(--text-secondary); margin-bottom: 1.25rem;">
+        Halaman ini dikhususkan untuk <strong>Election Authority (Panitia BEM)</strong> untuk mengelola 
+        kunci privat, parameter grup, dan menjalankan tally suara.
+      </p>
+      <div class="form-group">
+        <label for="admin-login-token">Kata Sandi / Token Otorisasi Panitia:</label>
+        <input type="password" id="admin-login-token" placeholder="Default demo: bem-kripto-2026" value="bem-kripto-2026">
+        <span style="font-size: 0.75rem; color: var(--text-muted); margin-top: 0.25rem; display: block;">
+          Token default demo: <code>bem-kripto-2026</code>
+        </span>
+      </div>
+      <button id="btn-submit-admin-login" class="btn btn-primary" style="width: 100%;">
+        Masuk ke Portal Panitia &rarr;
+      </button>
+      <div style="margin-top: 1rem; text-align: center;">
+        <a href="/voter.html" style="font-size: 0.8rem; color: var(--primary); text-decoration: none;">
+          Bukan panitia? Masuk ke Bilik Suara Pemilih &rarr;
+        </a>
+      </div>
+    </div>
+  </div>
+
+  <!-- Dashboard Panitia (Tampil setelah terotentikasi) -->
+  <main class="app-container" id="admin-dashboard-view" style="display: none;">
+    <div class="main-content">
+      <!-- Kendali Cepat Demo Presentasi -->
+      <div class="card" style="border-color: #8b5cf6; background: rgba(139, 92, 246, 0.05);">
+        <div class="card-title">
+          <span style="color: #a78bfa;">🚀 Kendali Presentasi & Demo 1-Klik</span>
+          <span style="font-size: 0.8rem; color: var(--text-muted);">Skenario Bagian 14</span>
+        </div>
+        <p style="font-size: 0.85rem; color: var(--text-secondary); margin-bottom: 0.75rem;">
+          Gunakan tombol di bawah ini untuk menyiapkan seluruh parameter dan pemilih demo secara instan, 
+          atau jalankan langkah-langkah manual di bawahnya.
+        </p>
+        <div style="display: flex; gap: 0.5rem; flex-wrap: wrap;">
+          <button id="btn-seed-demo" class="btn btn-primary btn-sm">⚡ Muat Pemilu Siap Demo (32-bit + 5 Voter)</button>
+          <button id="btn-simulate-votes" class="btn btn-secondary btn-sm">🤖 Simulasikan Suara V002–V005 (Otomatis)</button>
+          <button id="btn-reset-all" class="btn btn-danger btn-sm">🗑️ Reset Total</button>
+        </div>
+      </div>
+
+      <!-- Fase A: Setup Parameter & Keygen EA -->
+      <div class="card">
+        <div class="card-title">
+          <span>1. Setup Parameter Grup & Pasangan Kunci EA</span>
+          <span id="badge-param-status" class="badge badge-SERVER">Belum Ada</span>
+        </div>
+        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem;">
+          <div class="form-group">
+            <label for="select-mode">Pilih Skala Ukuran Bilangan Prima Aman (p = 2q + 1):</label>
+            <select id="select-mode">
+              <option value="demo" selected>Demo (32-bit Safe Prime) - Default Presentasi</option>
+              <option value="tiny">Tiny (24-bit Safe Prime) - Sangat Cepat</option>
+              <option value="mid">Menengah (256-bit Safe Prime) - Miller-Rabin</option>
+              <option value="real512">Realistis (512-bit Safe Prime) - Web Worker</option>
+              <option value="real2048">Skala Nyata (2048-bit RFC 3526 Group 14)</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label for="input-custom-candidates">Daftar Nama Kandidat (Pisahkan dengan koma):</label>
+            <input type="text" id="input-custom-candidates" value="Kandidat 1 - Andi Pratama, Kandidat 2 - Citra Lestari, Kandidat 3 - Dimas Wibowo">
+          </div>
+        </div>
+
+        <div style="margin-bottom: 1rem;">
+          <button id="btn-generate-params" class="btn btn-primary">
+            🔑 Bangkitkan Parameter & Keypair EA (ElGamal)
+          </button>
+          <span id="worker-progress" style="font-size: 0.8rem; color: #fbbf24; margin-left: 0.5rem;"></span>
+        </div>
+
+        <!-- Tabel Parameter Publik -->
+        <div id="params-display-area" style="display: none; background: rgba(0,0,0,0.25); padding: 0.75rem; border-radius: 0.5rem; font-size: 0.8rem;" class="mono">
+          <div style="display: grid; grid-template-columns: 140px 1fr; gap: 0.25rem;">
+            <span style="color:#60a5fa;">p (Safe Prime):</span> <span id="val-p" style="word-break: break-all;">-</span>
+            <span style="color:#60a5fa;">q (Subgrup Orde):</span> <span id="val-q" style="word-break: break-all;">-</span>
+            <span style="color:#60a5fa;">g (Generator):</span> <span id="val-g" style="word-break: break-all;">-</span>
+            <span style="color:#34d399;">h (Publik ElGamal EA):</span> <span id="val-h" style="word-break: break-all;">-</span>
+            <span style="color:#fbbf24;">ys (Publik Sign Server):</span> <span id="val-ys" style="word-break: break-all;">-</span>
+            <span style="color:#f472b6;">x (Privat EA):</span> <span style="color:var(--text-muted); font-style: italic;">Disimpan terisolasi di memori server/authority.js</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Fase B: Registrasi Pemilih (Voter) -->
+      <div class="card">
+        <div class="card-title">
+          <span>2. Registrasi & Otorisasi Pemilih (Voter)</span>
+          <span id="voter-count-badge" class="badge badge-SERVER">0 Pemilih</span>
+        </div>
+        <p style="font-size: 0.85rem; color: var(--text-secondary); margin-bottom: 0.75rem;">
+          PIN pemilih tidak pernah disimpan dalam bentuk teks polos, melainkan menggunakan 
+          <code>pinHash = SHA-256(salt || PIN)</code> dengan garam acak 16-byte unik per pemilih.
+        </p>
+
+        <!-- Form Tambah Voter Manual -->
+        <div style="background: rgba(0,0,0,0.2); padding: 0.75rem; border-radius: 0.5rem; margin-bottom: 1rem; border: 1px solid var(--border-color);">
+          <strong style="font-size: 0.85rem; display: block; margin-bottom: 0.5rem; color: #38bdf8;">+ Tambah Pemilih Baru:</strong>
+          <div style="display: flex; gap: 0.5rem; flex-wrap: wrap;">
+            <input type="text" id="new-voter-id" placeholder="ID Pemilih (mis. V006)" style="max-width: 180px;">
+            <input type="text" id="new-voter-pin" placeholder="PIN (mis. 666666)" style="max-width: 180px;">
+            <button id="btn-add-single-voter" class="btn btn-primary btn-sm">+ Tambahkan</button>
+            <button id="btn-load-default-voters" class="btn btn-secondary btn-sm">📋 Daftarkan 5 Voter Default (V001–V005)</button>
+          </div>
+        </div>
+
+        <table>
+          <thead>
+            <tr>
+              <th>ID Pemilih</th>
+              <th>Status Suara</th>
+              <th>Status Akun</th>
+              <th>PIN Demo (Tampil 1x)</th>
+            </tr>
+          </thead>
+          <tbody id="voters-table-body">
+            <tr>
+              <td colspan="4" style="text-align: center; color: var(--text-muted);">Belum ada pemilih terdaftar.</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+
+      <!-- Fase F: Kendali Alur Pemilihan & Penghitungan Suara -->
+      <div class="card">
+        <div class="card-title">
+          <span>3. Transisi State Pemilu & Tally Homomorfik</span>
+        </div>
+        <div style="display: flex; gap: 0.75rem; flex-wrap: wrap; align-items: center;">
+          <button id="btn-open-voting" class="btn btn-success">🟢 Buka Pemungutan Suara (VOTING)</button>
+          <button id="btn-reopen-voting" class="btn btn-success" style="display: none;">🔄 Buka Kembali Pemungutan Suara (RE-OPEN)</button>
+          <button id="btn-close-voting" class="btn btn-warning">🔴 Tutup Pemungutan Suara (CLOSED)</button>
+          <button id="btn-run-tally" class="btn btn-primary">🧮 Jalankan Tally Homomorfik & Dekripsi Total (TALLIED)</button>
+        </div>
+        <div id="tally-summary-area" style="margin-top: 1rem; display: none;"></div>
+      </div>
+    </div>
+
+    <!-- Panel Log Kripto Interaktif di Samping Kanan -->
+    <div id="crypto-log-container"></div>
+  </main>
+
+  <script type="module" src="/js/admin.js"></script>
+</body>
+</html>

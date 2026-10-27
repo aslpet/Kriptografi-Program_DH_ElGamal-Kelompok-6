@@ -1,0 +1,236 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>E-Voting Diffie-Hellman & ElGamal Murni</title>
+  <link rel="stylesheet" href="/css/style.css">
+</head>
+<body>
+  <header>
+    <a href="/" class="brand">
+      <span>🗳️</span>
+      <div>
+        E-Voting Kripto
+        <div class="sub">Diffie-Hellman & Exponential ElGamal</div>
+      </div>
+    </a>
+    <nav>
+      <a href="/" class="active">Beranda</a>
+      <a href="/admin.html">Admin (EA)</a>
+      <a href="/voter.html">Bilik Suara</a>
+      <a href="/ballots.html">Ballot Box</a>
+      <a href="/results.html">Hasil Pemilu</a>
+      <a href="/lab.html">Lab Kripto</a>
+    </nav>
+    <div id="status-container">
+      <span class="status-badge status-SETUP" id="current-state-badge">Memuat...</span>
+    </div>
+  </header>
+
+  <main class="app-container" style="grid-template-columns: 1fr;">
+    <div class="main-content">
+      <div class="card" style="background: linear-gradient(135deg, #1e293b 0%, #0f172a 100%); border-color: #3b82f6;">
+        <h2 style="font-size: 1.5rem; margin-bottom: 0.5rem; color: #60a5fa;">
+          Sistem E-Voting Berbasis Diffie-Hellman & ElGamal Murni
+        </h2>
+        <p style="color: var(--text-secondary); margin-bottom: 1rem;">
+          Implementasi mandiri tanpa library kriptografi untuk mendemonstrasikan setiap tahapan matematis 
+          <strong>Diffie-Hellman</strong> (saluran aman voter-server) dan <strong>Exponential ElGamal</strong> 
+          (enkripsi suara & tally homomorfik) dalam satu studi kasus: <em>Pemilihan Ketua BEM Fakultas</em>.
+        </p>
+        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; margin-top: 1rem;">
+          <div style="background: rgba(59, 130, 246, 0.1); border: 1px solid #3b82f6; border-radius: 0.5rem; padding: 1rem;">
+            <h3 style="color: #60a5fa; margin-bottom: 0.5rem; font-size: 1.1rem;">🗳️ Bilik Suara (Pemilih / Voter)</h3>
+            <p style="font-size: 0.85rem; color: var(--text-secondary); margin-bottom: 0.75rem;">
+              Khusus mahasiswa/pemilih untuk melakukan handshake Diffie-Hellman, otentikasi PIN di saluran terenkripsi, 
+              enkripsi suara ElGamal, dan mendapatkan bukti receipt.
+            </p>
+            <a href="/voter.html" class="btn btn-primary" style="width: 100%;">Masuk Bilik Suara Pemilih &rarr;</a>
+          </div>
+          <div style="background: rgba(139, 92, 246, 0.1); border: 1px solid #8b5cf6; border-radius: 0.5rem; padding: 1rem;">
+            <h3 style="color: #a78bfa; margin-bottom: 0.5rem; font-size: 1.1rem;">🛡️ Portal Panitia (Election Authority)</h3>
+            <p style="font-size: 0.85rem; color: var(--text-secondary); margin-bottom: 0.75rem;">
+              Khusus panitia pemilihan untuk setup parameter prima, keygen ElGamal, registrasi pemilih, 
+              buka/tutup bilik suara, dan menjalankan tally homomorfik.
+            </p>
+            <a href="/admin.html" class="btn btn-secondary" style="width: 100%;">Login Portal Panitia &rarr;</a>
+          </div>
+        </div>
+      </div>
+
+      <!-- Peta 14 Tahapan Kriptografi Sesuai Spesifikasi Tugas -->
+      <div class="card">
+        <div class="card-title">
+          <span>🗺️ Peta Peran Kriptografi End-to-End (Tabel Bagian 5)</span>
+          <span style="font-size: 0.8rem; color: var(--text-muted);">14 Tahap Terverifikasi</span>
+        </div>
+        <table>
+          <thead>
+            <tr>
+              <th>Tahap</th>
+              <th>Algoritma</th>
+              <th>Operasi Matematis</th>
+              <th>Input & Output</th>
+              <th>Lokasi Eksekusi</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td><strong>1. Setup Parameter</strong></td>
+              <td><span class="badge badge-DH">DH/ELGAMAL</span></td>
+              <td>Prima aman <code>p = 2q + 1</code>, generator <code>g = h^2 mod p</code> (orde q)</td>
+              <td>Bit &rarr; <code>(p, q, g)</code></td>
+              <td>Server / EA</td>
+            </tr>
+            <tr>
+              <td><strong>2. Keygen EA</strong></td>
+              <td><span class="badge badge-ELGAMAL">ELGAMAL</span></td>
+              <td><code>x &isin; [2, q-1]</code> (rahasia), <code>h = g^x mod p</code> (publik)</td>
+              <td>Parameter &rarr; <code>(x, h)</code></td>
+              <td>Backend EA (Private x)</td>
+            </tr>
+            <tr>
+              <td><strong>3. Handshake Voter</strong></td>
+              <td><span class="badge badge-DH">DH</span></td>
+              <td><code>a &isin; [2, q-1]</code>, <code>A = g^a mod p</code></td>
+              <td>Parameter &rarr; <code>(a, A)</code></td>
+              <td>Browser Klien</td>
+            </tr>
+            <tr>
+              <td><strong>4. Handshake Server</strong></td>
+              <td><span class="badge badge-DH">DH</span></td>
+              <td><code>b &isin; [2, q-1]</code>, <code>B = g^b mod p</code></td>
+              <td>A &rarr; <code>(b, B)</code></td>
+              <td>Server</td>
+            </tr>
+            <tr>
+              <td><strong>5. Kunci Sesi Bersama</strong></td>
+              <td><span class="badge badge-DH">DH</span></td>
+              <td>Voter: <code>K = B^a mod p</code>, Server: <code>K = A^b mod p</code></td>
+              <td>B atau A &rarr; <code>K</code> identik</td>
+              <td>Browser & Server</td>
+            </tr>
+            <tr>
+              <td><strong>6. Penurunan Kunci</strong></td>
+              <td><span class="badge badge-CHANNEL">CHANNEL</span></td>
+              <td><code>encKey, macKey = KDF(K, transcript)</code> via SHA-256</td>
+              <td>K, Transkrip &rarr; 2 Kunci</td>
+              <td>Browser & Server</td>
+            </tr>
+            <tr>
+              <td><strong>7. Enkripsi Suara</strong></td>
+              <td><span class="badge badge-ELGAMAL">ELGAMAL</span></td>
+              <td>Vektor <code>m_i = g^{v_i}</code>, <code>c1_i = g^{k_i}</code>, <code>c2_i = m_i &middot; h^{k_i} mod p</code></td>
+              <td>Pilihan &rarr; <code>[(c1, c2)]</code></td>
+              <td>Browser Klien</td>
+            </tr>
+            <tr>
+              <td><strong>8. Pengamanan Saluran</strong></td>
+              <td><span class="badge badge-CHANNEL">CHANNEL</span></td>
+              <td>Counter-mode Keystream XOR + HMAC-SHA256 Encrypt-then-MAC</td>
+              <td>Payload &rarr; <code>{seq, ct, tag}</code></td>
+              <td>Browser Klien</td>
+            </tr>
+            <tr>
+              <td><strong>9. Kotak Suara Anonim</strong></td>
+              <td><span class="badge badge-SERVER">BALLOT BOX</span></td>
+              <td>Verifikasi HMAC, tolak double-voting atomik, simpan tanpa ID</td>
+              <td>Paket &rarr; <code>Receipt SHA-256</code></td>
+              <td>Ballot Box Publik</td>
+            </tr>
+            <tr>
+              <td><strong>10. Agregasi Homomorfik</strong></td>
+              <td><span class="badge badge-ELGAMAL">ELGAMAL</span></td>
+              <td><code>C1_j = &prod; c1</code>, <code>C2_j = &prod; c2 mod p</code></td>
+              <td>V Ballot &rarr; 3 Pasang Agregat</td>
+              <td>Server (Publik)</td>
+            </tr>
+            <tr>
+              <td><strong>11. Dekripsi Total EA</strong></td>
+              <td><span class="badge badge-ELGAMAL">ELGAMAL</span></td>
+              <td><code>s = C1^x mod p</code>, <code>g^T = C2 &middot; s^{-1} mod p</code></td>
+              <td>x, Agregat &rarr; <code>g^T</code></td>
+              <td>Backend EA</td>
+            </tr>
+            <tr>
+              <td><strong>12. Pemulihan Suara T</strong></td>
+              <td><span class="badge badge-ELGAMAL">DLOG</span></td>
+              <td>Cari <code>T &isin; [0..V]</code> di mana <code>g^T == gT</code></td>
+              <td>g^T &rarr; Perolehan Suara</td>
+              <td>Server</td>
+            </tr>
+            <tr>
+              <td><strong>13. Verifikasi Konsistensi</strong></td>
+              <td><span class="badge badge-SERVER">AUDIT</span></td>
+              <td>Audit matematis: <code>&sum; T_j == V</code> (total suara == total ballot)</td>
+              <td>Hasil &rarr; Valid / Tidak</td>
+              <td>Halaman Hasil</td>
+            </tr>
+            <tr>
+              <td><strong>14. [BONUS] Autentikasi DH</strong></td>
+              <td><span class="badge badge-ELGAMAL">SIGNATURE</span></td>
+              <td>Server menandatangani transkrip DH: <code>g^H == ys^r &middot; r^s mod p</code></td>
+              <td>Transkrip &rarr; Anti-MITM</td>
+              <td>Browser & Server</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+
+      <!-- Quick Cards Navigation -->
+      <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 1rem;">
+        <div class="card">
+          <h3 style="margin-bottom: 0.5rem; color: #38bdf8;">⚙️ 1. Panel Panitia (Admin/EA)</h3>
+          <p style="font-size: 0.85rem; color: var(--text-secondary); margin-bottom: 0.75rem;">
+            Bangkitkan parameter grup siklik (24, 32, 256, 512, atau 2048-bit), buat keypair EA, 
+            daftarkan voter (V001–V005), dan kendalikan tahapan pemilu.
+          </p>
+          <a href="/admin.html" class="btn btn-secondary btn-sm">Buka Panel Admin &rarr;</a>
+        </div>
+        <div class="card">
+          <h3 style="margin-bottom: 0.5rem; color: #34d399;">🗳️ 2. Bilik Suara (Voter)</h3>
+          <p style="font-size: 0.85rem; color: var(--text-secondary); margin-bottom: 0.75rem;">
+            Alur 4 tahap interaktif: Handshake DH &rarr; Login PIN aman &rarr; Enkripsi suara ElGamal di browser 
+            &rarr; Kirim paket aman, verifikasi receipt, dan uji coba serangan.
+          </p>
+          <a href="/voter.html" class="btn btn-secondary btn-sm">Buka Bilik Suara &rarr;</a>
+        </div>
+        <div class="card">
+          <h3 style="margin-bottom: 0.5rem; color: #f472b6;">📊 3. Hasil & Audit Tally</h3>
+          <p style="font-size: 0.85rem; color: var(--text-secondary); margin-bottom: 0.75rem;">
+            Lihat hasil perkalian homomorfik ciphertext, proses dekripsi total suara oleh EA, 
+            tabel iterasi logaritma diskret, dan bukti konsistensi matematis.
+          </p>
+          <a href="/results.html" class="btn btn-secondary btn-sm">Buka Hasil Pemilu &rarr;</a>
+        </div>
+        <div class="card">
+          <h3 style="margin-bottom: 0.5rem; color: #fbbf24;">🔬 4. Lab / Playground Kripto</h3>
+          <p style="font-size: 0.85rem; color: var(--text-secondary); margin-bottom: 0.75rem;">
+            Uji test vector angka kecil (p=23, g=4) yang cocok persis dengan hitungan manual, kalkulator 
+            square-and-multiply bit demi bit, dan simulasi penyerang MITM.
+          </p>
+          <a href="/lab.html" class="btn btn-secondary btn-sm">Buka Lab Kripto &rarr;</a>
+        </div>
+      </div>
+    </div>
+  </main>
+
+  <script type="module">
+    async function loadState() {
+      try {
+        const res = await fetch('/api/params');
+        if (!res.ok) return;
+        const data = await res.json();
+        const badge = document.getElementById('current-state-badge');
+        if (badge) {
+          badge.textContent = `Status: ${data.state}`;
+          badge.className = `status-badge status-${data.state}`;
+        }
+      } catch {}
+    }
+    loadState();
+    setInterval(loadState, 3000);
+  </script>
+</body>
+</html>

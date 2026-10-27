@@ -1,0 +1,108 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Hasil Pemilu & Audit Tally - E-Voting Kripto</title>
+  <link rel="stylesheet" href="/css/style.css">
+</head>
+<body>
+  <header>
+    <a href="/" class="brand">
+      <span>🗳️</span>
+      <div>
+        Hasil Pemilu & Verifikasi Homomorfik
+        <div class="sub">Diffie-Hellman & Exponential ElGamal</div>
+      </div>
+    </a>
+    <nav>
+      <a href="/">Beranda</a>
+      <a href="/admin.html">Admin (EA)</a>
+      <a href="/voter.html">Bilik Suara</a>
+      <a href="/ballots.html">Ballot Box</a>
+      <a href="/results.html" class="active">Hasil Pemilu</a>
+      <a href="/lab.html">Lab Kripto</a>
+    </nav>
+    <div>
+      <span class="status-badge" id="current-state-badge">TALLIED</span>
+    </div>
+  </header>
+
+  <main class="app-container">
+    <div class="main-content">
+      <!-- Ringkasan Hasil & Banner Konsistensi -->
+      <div class="card" id="results-banner-card">
+        <div class="card-title">
+          <span>🏆 Hasil Perolehan Suara Pemilihan Ketua BEM</span>
+          <span id="consistency-badge" class="badge badge-ELGAMAL">Memuat...</span>
+        </div>
+        <p style="font-size: 0.85rem; color: var(--text-secondary); margin-bottom: 1rem;">
+          Penghitungan dilakukan menggunakan sifat homomorfik aditif pada <strong>Exponential ElGamal</strong>: 
+          seluruh ciphertext dikalikan per kandidat, dan Election Authority (EA) <em>hanya mendekripsi hasil kali tersebut</em>. 
+          Pilihan suara individu tidak pernah didekripsi.
+        </p>
+
+        <!-- Grafik Batang Visual -->
+        <div id="chart-container" style="display: flex; flex-direction: column; gap: 0.75rem; margin-bottom: 1.5rem;">
+          <!-- Dynamically populated bars -->
+        </div>
+
+        <div style="font-size: 0.85rem; color: var(--text-secondary);" id="total-summary-text">
+          Total Suara Masuk: <strong id="total-v-val" style="color:#f8fafc;">0</strong> Ballot
+        </div>
+      </div>
+
+      <!-- Rincian Dekripsi & Agregasi Homomorfik Matematis -->
+      <div class="card">
+        <div class="card-title">
+          <span>📐 Audit Matematis: Agregasi Homomorfik & Pemulihan Suara T</span>
+        </div>
+        <p style="font-size: 0.85rem; color: var(--text-secondary); margin-bottom: 0.75rem;">
+          Tabel di bawah ini membuktikan setiap tahap komputasi matematika:
+          <code>C1 = &prod; c1 mod p</code>, <code>C2 = &prod; c2 mod p</code>, dan pemulihan <code>T</code> dari <code>g^T</code>.
+        </p>
+        <table>
+          <thead>
+            <tr>
+              <th>Kandidat</th>
+              <th>Agregat C1 (&prod; c1)</th>
+              <th>Agregat C2 (&prod; c2)</th>
+              <th>Hasil Dekripsi g^T</th>
+              <th>Suara T</th>
+              <th>Iterasi Dlog</th>
+            </tr>
+          </thead>
+          <tbody id="tally-details-body" class="mono" style="font-size: 0.75rem;">
+            <tr>
+              <td colspan="6" style="text-align: center; color: var(--text-muted); font-family: var(--font-sans);">
+                Memuat data hasil pemilu...
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+
+      <!-- Penjelasan Sifat Homomorfik -->
+      <div class="card" style="background: rgba(30, 41, 59, 0.5);">
+        <h4 style="color: #60a5fa; margin-bottom: 0.5rem;">💡 Mengapa Suara Rahasia Tetap Terjaga?</h4>
+        <p style="font-size: 0.85rem; color: var(--text-secondary); line-height: 1.6;">
+          Pada ElGamal standar, enkripsi dari $m_1$ dan $m_2$ yang dikalikan menghasilkan enkripsi dari $m_1 \cdot m_2$. 
+          Dengan menyandikan suara sebagai eksponen basis generator ($m_i = g^{v_i}$), perkalian ciphertext menghasilkan:
+          <br/>
+          <code class="mono" style="color: #34d399; display: block; margin: 0.4rem 0;">
+            (g^{k_1} &middot; g^{k_2}) = g^{k_1 + k_2} &nbsp;|&nbsp; (g^{v_1} h^{k_1}) &middot; (g^{v_2} h^{k_2}) = g^{v_1 + v_2} h^{k_1 + k_2}
+          </code>
+          Saat didekripsi menggunakan kunci privat EA $x$, faktor $h^{k_1+k_2}$ tereliminasi dan menyisakan tepat $g^{v_1 + v_2} = g^T$. 
+          Karena nilai $T$ dibatasi oleh jumlah pemilih $V$ yang bernilai kecil, nilai $T$ dapat dipulihkan dengan cepat 
+          tanpa pernah mengungkap nilai $v_1, v_2, \dots$ milik masing-masing pemilih.
+        </p>
+      </div>
+    </div>
+
+    <!-- Panel Log Kripto Interaktif di Samping Kanan -->
+    <div id="crypto-log-container"></div>
+  </main>
+
+  <script type="module" src="/js/results.js"></script>
+</body>
+</html>

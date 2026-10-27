@@ -1,0 +1,107 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Ballot Box Publik - E-Voting Kripto</title>
+  <link rel="stylesheet" href="/css/style.css">
+</head>
+<body>
+  <header>
+    <a href="/" class="brand">
+      <span>🗳️</span>
+      <div>
+        Ballot Box Publik (Audit Ciphertext)
+        <div class="sub">Diffie-Hellman & Exponential ElGamal</div>
+      </div>
+    </a>
+    <nav>
+      <a href="/">Beranda</a>
+      <a href="/admin.html">Admin (EA)</a>
+      <a href="/voter.html">Bilik Suara</a>
+      <a href="/ballots.html" class="active">Ballot Box</a>
+      <a href="/results.html">Hasil Pemilu</a>
+      <a href="/lab.html">Lab Kripto</a>
+    </nav>
+    <div>
+      <span class="status-badge" id="current-state-badge">VOTING</span>
+    </div>
+  </header>
+
+  <main class="app-container" style="grid-template-columns: 1fr;">
+    <div class="main-content">
+      <!-- Verifikasi Tanda Terima (Receipt) -->
+      <div class="card">
+        <div class="card-title">
+          <span>🔍 Verifikasi Keberadaan Suara (Cek Receipt Anda)</span>
+        </div>
+        <p style="font-size: 0.85rem; color: var(--text-secondary); margin-bottom: 0.75rem;">
+          Masukkan kode Receipt SHA-256 yang Anda peroleh saat memilih untuk membuktikan bahwa suara Anda 
+          tersimpan dengan benar di kotak suara tanpa membocorkan pilihan kandidat Anda.
+        </p>
+        <div style="display: flex; gap: 0.5rem; max-width: 600px;">
+          <input type="text" id="receipt-search-input" placeholder="Masukkan 64-karakter Hex Hash Receipt..." class="mono" style="font-size: 0.8rem;">
+          <button id="btn-search-receipt" class="btn btn-primary btn-sm">Cari</button>
+        </div>
+        <div id="receipt-search-result" style="margin-top: 0.5rem; font-size: 0.85rem; font-weight: 500;"></div>
+      </div>
+
+      <!-- Tabel Seluruh Ciphertext yang Masuk ke Ballot Box -->
+      <div class="card">
+        <div class="card-title">
+          <span>📦 Kotak Suara Publik (Semua Ciphertext Anonim)</span>
+          <span id="ballot-count-badge" class="badge badge-SERVER">0 Ballot</span>
+        </div>
+        <p style="font-size: 0.85rem; color: var(--text-secondary); margin-bottom: 0.75rem;">
+          Seluruh isi ballot di bawah ini hanya berupa pasangan ciphertext ElGamal <code>(c1, c2)</code>. 
+          Bahkan panitia maupun operator server tidak dapat mendekripsi suara individual ini sebelum agregasi homomorfik dilakukan.
+        </p>
+        <table>
+          <thead>
+            <tr>
+              <th>#</th>
+              <th>Waktu Masuk</th>
+              <th>Hash Receipt (SHA-256)</th>
+              <th>Vektor Ciphertext [(c1, c2)] Tiap Kandidat</th>
+            </tr>
+          </thead>
+          <tbody id="ballots-table-body" class="mono" style="font-size: 0.75rem;">
+            <tr>
+              <td colspan="4" style="text-align: center; color: var(--text-muted); font-family: var(--font-sans);">
+                Kotak suara masih kosong.
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+
+      <!-- Status Partisipasi Pemilih (Terpisah dari Isi Ballot) -->
+      <div class="card">
+        <div class="card-title">
+          <span>👥 Daftar Partisipasi Pemilih (Audit Anti-Double Voting)</span>
+        </div>
+        <p style="font-size: 0.85rem; color: var(--text-secondary); margin-bottom: 0.75rem;">
+          Tabel di bawah ini hanya mencatat <em>apakah</em> seorang pemilih sudah memberikan suara atau belum, 
+          dan sama sekali tidak terhubung ke baris ballot di atas.
+        </p>
+        <table>
+          <thead>
+            <tr>
+              <th>ID Pemilih</th>
+              <th>Status Memberikan Suara</th>
+              <th>Status Akun</th>
+            </tr>
+          </thead>
+          <tbody id="voter-participation-body">
+            <tr>
+              <td colspan="3" style="text-align: center; color: var(--text-muted);">Memuat...</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </main>
+
+  <script type="module" src="/js/ballots.js"></script>
+</body>
+</html>

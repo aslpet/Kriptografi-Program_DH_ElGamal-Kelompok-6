@@ -1,0 +1,247 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Bilik Suara (Voter Booth) - E-Voting Kripto</title>
+  <link rel="stylesheet" href="/css/style.css">
+</head>
+<body>
+  <header>
+    <a href="/" class="brand">
+      <span>🗳️</span>
+      <div>
+        Bilik Suara Elektronik
+        <div class="sub">Portal Pemilih Mahasiswa (Voter Booth)</div>
+      </div>
+    </a>
+    <nav>
+      <a href="/">Beranda</a>
+      <a href="/voter.html" class="active">Bilik Suara</a>
+      <a href="/ballots.html">Kotak Suara Publik</a>
+      <a href="/results.html">Hasil Pemilu</a>
+      <a href="/lab.html">Lab Kripto</a>
+    </nav>
+    <div>
+      <span class="status-badge" id="current-state-badge">MEMUAT...</span>
+    </div>
+  </header>
+
+  <main class="app-container">
+    <div class="main-content">
+      <!-- Banner Status Keaktifan Bilik Suara -->
+      <div id="booth-status-banner" class="card" style="display: none; padding: 0.75rem 1rem;">
+        <div id="booth-status-text" style="font-size: 0.9rem; font-weight: 600; display: flex; align-items: center; gap: 0.5rem;">
+        </div>
+      </div>
+
+      <!-- Stepper 4 Langkah Interaktif -->
+      <div class="stepper">
+        <div class="step-item active" id="step-nav-1">
+          <div class="step-number">1</div>
+          <span>Handshake DH</span>
+        </div>
+        <div class="step-item" id="step-nav-2">
+          <div class="step-number">2</div>
+          <span>Login Aman</span>
+        </div>
+        <div class="step-item" id="step-nav-3">
+          <div class="step-number">3</div>
+          <span>Enkripsi Suara</span>
+        </div>
+        <div class="step-item" id="step-nav-4">
+          <div class="step-number">4</div>
+          <span>Kirim & Bukti</span>
+        </div>
+      </div>
+
+      <!-- Langkah 1: Handshake DH -->
+      <div class="card" id="card-step-1">
+        <div class="card-title">
+          <span>Langkah 1: Pertukaran Kunci Diffie-Hellman Terautentikasi</span>
+          <span class="badge badge-DH">DH + SIGNATURE</span>
+        </div>
+        <p style="font-size: 0.85rem; color: var(--text-secondary); margin-bottom: 1rem;">
+          Browser Anda akan memilih nilai privat acak <code>a &isin; [2, q-1]</code>, menghitung kunci publik 
+          <code>A = g^a mod p</code>, mengirimkannya ke server, memverifikasi tanda tangan ElGamal server <code>ys</code>, 
+          dan menghitung kunci rahasia bersama <code>K = B^a mod p</code> tanpa pernah mengirim <code>K</code>.
+        </p>
+
+        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; margin-bottom: 1rem;">
+          <div class="form-group">
+            <label for="voter-id-select">Pilih ID Pemilih Anda:</label>
+            <select id="voter-id-select">
+              <option value="">-- Memuat Daftar Pemilih... --</option>
+            </select>
+          </div>
+          <div class="form-group" id="group-custom-voter" style="display: none;">
+            <label for="voter-id-custom">Masukkan ID Pemilih Manual:</label>
+            <input type="text" id="voter-id-custom" placeholder="mis. MHS001">
+          </div>
+        </div>
+
+        <button id="btn-start-dh" class="btn btn-primary">
+          🤝 Jalankan Handshake Diffie-Hellman di Browser
+        </button>
+
+        <div id="dh-result-box" style="display: none; margin-top: 1rem; background: rgba(0,0,0,0.25); padding: 0.75rem; border-radius: 0.5rem; font-size: 0.8rem;" class="mono">
+          <div style="color: #34d399; font-weight: 600; margin-bottom: 0.5rem; display: flex; align-items: center; gap: 0.4rem;">
+            <span>✓</span> K voter == K server (Shared Secret Terverifikasi HMAC!)
+          </div>
+          <div style="display: grid; grid-template-columns: 140px 1fr; gap: 0.25rem;">
+            <span style="color:#60a5fa;">Privat a (Voter):</span> <span id="voter-val-a">-</span>
+            <span style="color:#60a5fa;">Publik A (Voter):</span> <span id="voter-val-A">-</span>
+            <span style="color:#fbbf24;">Publik B (Server):</span> <span id="voter-val-B">-</span>
+            <span style="color:#a78bfa;">Shared Secret K:</span> <span id="voter-val-K">-</span>
+            <span style="color:#34d399;">Tanda Tangan Server:</span> <span id="voter-val-sig">Valid (g^H == ys^r * r^s)</span>
+          </div>
+          <div style="margin-top: 0.75rem;">
+            <button id="btn-goto-step-2" class="btn btn-success btn-sm">Lanjut ke Langkah 2: Login Aman &rarr;</button>
+          </div>
+        </div>
+      </div>
+
+      <!-- Langkah 2: Login Saluran Aman -->
+      <div class="card" id="card-step-2" style="display: none;">
+        <div class="card-title">
+          <span>Langkah 2: Autentikasi Pemilih di Dalam Saluran DH</span>
+          <span class="badge badge-CHANNEL">ENCRYPT-THEN-MAC</span>
+        </div>
+        <p style="font-size: 0.85rem; color: var(--text-secondary); margin-bottom: 1rem;">
+          PIN Anda tidak dikirim dalam teks biasa. Browser mengenkripsinya dengan <code>encKey</code> dan 
+          memberikan tag integritas <code>HMAC-SHA256</code> menggunakan <code>macKey</code> yang diturunkan dari <code>K</code>.
+        </p>
+
+        <div style="max-width: 320px;" class="form-group">
+          <label for="voter-pin-input">Masukkan 6-Digit PIN Anda:</label>
+          <input type="password" id="voter-pin-input" placeholder="mis. 111111" maxlength="12">
+        </div>
+
+        <button id="btn-submit-login" class="btn btn-primary">
+          🔐 Login Melalui Saluran Terenkripsi
+        </button>
+      </div>
+
+      <!-- Langkah 3: Pilih Kandidat & Enkripsi ElGamal -->
+      <div class="card" id="card-step-3" style="display: none;">
+        <div class="card-title">
+          <span>Langkah 3: Pilih Kandidat & Enkripsi ElGamal di Browser</span>
+          <span class="badge badge-ELGAMAL">EXPONENTIAL ELGAMAL</span>
+        </div>
+        <p style="font-size: 0.85rem; color: var(--text-secondary); margin-bottom: 1rem;">
+          Pilihan suara dienkripsi langsung di browser Anda menggunakan kunci publik ElGamal <code>h</code> milik Panitia. 
+          Server tidak akan pernah mengetahui kandidat mana yang Anda pilih!
+        </p>
+
+        <div class="form-group">
+          <label style="font-size: 0.9rem; font-weight: 600; margin-bottom: 0.5rem;">Pilih Calon Ketua BEM:</label>
+          <div id="candidates-radio-container" style="display: flex; flex-direction: column; gap: 0.5rem;">
+            <!-- Radio candidates dynamically rendered -->
+          </div>
+        </div>
+
+        <button id="btn-encrypt-vote" class="btn btn-primary">
+          🔒 Enkripsi Suara di Browser (ElGamal Eksponensial)
+        </button>
+
+        <!-- Tabel Ciphertext ElGamal Hasil Enkripsi -->
+        <div id="encryption-result-box" style="display: none; margin-top: 1rem;">
+          <h4 style="font-size: 0.9rem; color: #34d399; margin-bottom: 0.5rem;">
+            ✓ Hasil Enkripsi Vektor Suara di Sisi Klien (Browser):
+          </h4>
+          <table>
+            <thead>
+              <tr>
+                <th>Kandidat</th>
+                <th>Nilai v</th>
+                <th>Pesan m = g^v</th>
+                <th>Nonce k (Acak)</th>
+                <th>Ciphertext c1 = g^k</th>
+                <th>Ciphertext c2 = m &middot; h^k</th>
+              </tr>
+            </thead>
+            <tbody id="client-ciphertext-table" class="mono" style="font-size: 0.75rem;">
+            </tbody>
+          </table>
+          <div style="margin-top: 1rem;">
+            <button id="btn-goto-step-4" class="btn btn-success">Lanjut ke Langkah 4: Kirim Suara &rarr;</button>
+          </div>
+        </div>
+      </div>
+
+      <!-- Langkah 4: Pengiriman Paket Aman, Receipt & Uji Serangan -->
+      <div class="card" id="card-step-4" style="display: none;">
+        <div class="card-title">
+          <span>Langkah 4: Pengiriman Ballot Aman, Bukti Receipt & Audit</span>
+          <span class="badge badge-CHANNEL">BALLOT CAST</span>
+        </div>
+
+        <button id="btn-cast-vote" class="btn btn-primary" style="margin-bottom: 1rem;">
+          📨 Kirim Ballot Terenkripsi ke Kotak Suara
+        </button>
+
+        <div id="receipt-display-box" style="display: none; background: rgba(16, 185, 129, 0.1); border: 1px solid #10b981; padding: 1rem; border-radius: 0.5rem; margin-bottom: 1.5rem;">
+          <h3 style="color: #34d399; margin-bottom: 0.35rem;">🎉 Suara Anda Berhasil Diterima dan Dicatat!</h3>
+          <p style="font-size: 0.85rem; color: var(--text-secondary); margin-bottom: 0.5rem;">
+            Simpan kode tanda terima (Receipt) Anda untuk memverifikasi keberadaan ballot di kotak suara publik:
+          </p>
+          <div class="mono" style="background: rgba(0,0,0,0.4); padding: 0.5rem; border-radius: 0.25rem; word-break: break-all; color: #38bdf8; font-size: 0.85rem;" id="voter-receipt-code">
+            -
+          </div>
+          <div style="margin-top: 0.75rem; display: flex; gap: 0.5rem;">
+            <a href="/ballots.html" class="btn btn-secondary btn-sm">🔍 Lihat di Kotak Suara Publik</a>
+            <button id="btn-finish-vote" class="btn btn-success btn-sm">🚪 Selesai & Keluar Bilik Suara</button>
+          </div>
+        </div>
+
+        <!-- Perbandingan 3 Sudut Pandang -->
+        <div class="card-title" style="font-size: 1rem; margin-top: 1rem;">
+          <span>👁️ Perbandingan 3 Sudut Pandang: Siapa Mengetahui Apa?</span>
+        </div>
+        <div class="comparison-grid">
+          <div class="comparison-col">
+            <h4 style="color: #60a5fa;">1. Yang Diketahui Voter</h4>
+            <div id="view-voter" class="mono" style="color: var(--text-secondary);">
+              - Pilihan suara asli (v)<br/>
+              - Nonce acak (k)<br/>
+              - Kunci privat DH (a)<br/>
+              - Shared Secret (K)
+            </div>
+          </div>
+          <div class="comparison-col">
+            <h4 style="color: #fbbf24;">2. Yang Terlihat di Jaringan (Tab Network)</h4>
+            <div id="view-network" class="mono" style="color: var(--text-secondary); word-break: break-all;">
+              - ct (Keystream XOR)<br/>
+              - tag (HMAC-SHA256)<br/>
+              <em>Penyadap hanya melihat bytes acak!</em>
+            </div>
+          </div>
+          <div class="comparison-col">
+            <h4 style="color: #34d399;">3. Yang Diterima Server (Ballot Box)</h4>
+            <div id="view-server" class="mono" style="color: var(--text-secondary); word-break: break-all;">
+              - Ciphertext ElGamal (c1, c2)<br/>
+              - Receipt Hash<br/>
+              <em>Identitas voterId TIDAK disimpan bersama suara!</em>
+            </div>
+          </div>
+        </div>
+
+        <!-- Tombol Demonstrasi Pengujian Serangan Kriptografi -->
+        <div style="margin-top: 1.5rem; padding-top: 1rem; border-top: 1px solid var(--border-color);">
+          <h4 style="color: #f87171; margin-bottom: 0.5rem;">🛡️ Demonstrasi Ketahanan Serangan (Security Tests):</h4>
+          <div style="display: flex; gap: 0.5rem; flex-wrap: wrap;">
+            <button id="btn-test-double-vote" class="btn btn-danger btn-sm">⚠️ Coba Vote Ulang (Uji Anti-Double Voting)</button>
+            <button id="btn-test-replay-vote" class="btn btn-danger btn-sm">⚠️ Kirim Ulang Paket Lama (Uji Anti-Replay seq)</button>
+          </div>
+          <div id="attack-test-result" style="margin-top: 0.5rem; font-size: 0.8rem;" class="mono"></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Panel Log Kripto Interaktif di Samping Kanan -->
+    <div id="crypto-log-container"></div>
+  </main>
+
+  <script type="module" src="/js/voter.js"></script>
+</body>
+</html>

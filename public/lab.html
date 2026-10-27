@@ -1,0 +1,166 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Lab Kripto Playground - E-Voting Kripto</title>
+  <link rel="stylesheet" href="/css/style.css">
+</head>
+<body>
+  <header>
+    <a href="/" class="brand">
+      <span>🗳️</span>
+      <div>
+        Lab Kripto & Playground Interaktif
+        <div class="sub">Diffie-Hellman & Exponential ElGamal</div>
+      </div>
+    </a>
+    <nav>
+      <a href="/">Beranda</a>
+      <a href="/admin.html">Admin (EA)</a>
+      <a href="/voter.html">Bilik Suara</a>
+      <a href="/ballots.html">Ballot Box</a>
+      <a href="/results.html">Hasil Pemilu</a>
+      <a href="/lab.html" class="active">Lab Kripto</a>
+    </nav>
+    <div>
+      <span class="status-badge status-VOTING">LAB AKTIF</span>
+    </div>
+  </header>
+
+  <main class="app-container">
+    <div class="main-content">
+      <!-- Tabs Navigasi Lab -->
+      <div class="tabs">
+        <button class="tab-btn active" id="tab-btn-vector">1. Test Vector (p=23, g=4)</button>
+        <button class="tab-btn" id="tab-btn-modexp">2. Kalkulator modExp (Square & Multiply)</button>
+        <button class="tab-btn" id="tab-btn-mitm">3. Simulator Serangan MITM [BONUS]</button>
+      </div>
+
+      <!-- Tab 1: Test Vector Standar Angka Kecil Bagian 6.10 -->
+      <div class="card" id="tab-content-vector">
+        <div class="card-title">
+          <span>🔬 Test Vector Angka Kecil (Sesuai Bagian 6.10)</span>
+          <span class="badge badge-ELGAMAL">p=23, q=11, g=4</span>
+        </div>
+        <p style="font-size: 0.85rem; color: var(--text-secondary); margin-bottom: 1rem;">
+          Angka-angka di bawah ini sudah diverifikasi secara manual. Gunakan tombol di bawah ini untuk 
+          mencocokkan setiap rumus dengan catatan kuliah atau perhitungan tangan secara instan.
+        </p>
+
+        <!-- Bagian DH -->
+        <h4 style="color: #60a5fa; margin-bottom: 0.5rem;">A. Diffie-Hellman (a=6, b=3)</h4>
+        <div style="background: rgba(0,0,0,0.25); padding: 0.75rem; border-radius: 0.5rem; font-size: 0.8rem; margin-bottom: 1rem;" class="mono">
+          <div style="display: grid; grid-template-columns: 140px 1fr; gap: 0.25rem;">
+            <span>Voter a = 6:</span> <span>A = 4^6 mod 23 = <strong style="color:#38bdf8;" id="tv-val-A">2</strong></span>
+            <span>Server b = 3:</span> <span>B = 4^3 mod 23 = <strong style="color:#fbbf24;" id="tv-val-B">18</strong></span>
+            <span>K Voter:</span> <span>K = 18^6 mod 23 = <strong style="color:#34d399;" id="tv-val-Kv">8</strong></span>
+            <span>K Server:</span> <span>K = 2^3 mod 23 = <strong style="color:#34d399;" id="tv-val-Ks">8</strong> (K voter == K server: OK)</span>
+          </div>
+        </div>
+
+        <!-- Bagian ElGamal & Homomorfik -->
+        <h4 style="color: #34d399; margin-bottom: 0.5rem;">B. Exponential ElGamal & Tally Homomorfik</h4>
+        <div style="background: rgba(0,0,0,0.25); padding: 0.75rem; border-radius: 0.5rem; font-size: 0.8rem; margin-bottom: 1rem;" class="mono">
+          <div style="display: grid; grid-template-columns: 140px 1fr; gap: 0.25rem;">
+            <span>EA Keygen x=7:</span> <span>h = 4^7 mod 23 = <strong style="color:#34d399;" id="tv-val-h">8</strong></span>
+            <span>Voter 1 (v=1, k=3):</span> <span>c1 = 4^3 mod 23 = <strong style="color:#60a5fa;" id="tv-val-v1c1">18</strong>, c2 = 4 &middot; 8^3 mod 23 = <strong style="color:#60a5fa;" id="tv-val-v1c2">1</strong></span>
+            <span>Voter 2 (v=0, k=5):</span> <span>c1 = 4^5 mod 23 = <strong style="color:#60a5fa;" id="tv-val-v2c1">12</strong>, c2 = 1 &middot; 8^5 mod 23 = <strong style="color:#60a5fa;" id="tv-val-v2c2">16</strong></span>
+            <span style="color:#a78bfa;">Agregasi C1:</span> <span>C1 = (18 &middot; 12) mod 23 = 216 mod 23 = <strong style="color:#a78bfa;" id="tv-val-C1">9</strong></span>
+            <span style="color:#a78bfa;">Agregasi C2:</span> <span>C2 = (1 &middot; 16) mod 23 = <strong style="color:#a78bfa;" id="tv-val-C2">16</strong></span>
+            <span>Dekripsi s:</span> <span>s = 9^7 mod 23 = <strong style="color:#fbbf24;" id="tv-val-s">4</strong>, s^-1 mod 23 = <strong style="color:#fbbf24;" id="tv-val-sinv">6</strong> (karena 4&middot;6 = 24 &equiv; 1)</span>
+            <span>Hasil g^T:</span> <span>g^T = (16 &middot; 6) mod 23 = 96 mod 23 = <strong style="color:#38bdf8;" id="tv-val-gT">4</strong></span>
+            <span style="color:#34d399; font-weight:700;">Hasil Suara T:</span> <span>g^T = 4 = 4^1 &rArr; <strong style="color:#34d399; font-size:1rem;" id="tv-val-T">T = 1 Suara</strong> (Cocok!)</span>
+          </div>
+        </div>
+
+        <button id="btn-run-test-vector" class="btn btn-primary">
+          ▶ Jalankan & Kirim ke Panel Log Kripto
+        </button>
+      </div>
+
+      <!-- Tab 2: Kalkulator modExp Step-by-Step (Square and Multiply) -->
+      <div class="card" id="tab-content-modexp" style="display: none;">
+        <div class="card-title">
+          <span>📐 Kalkulator modExp (Square-and-Multiply Bit-by-Bit)</span>
+          <span class="badge badge-DH">O(log exp)</span>
+        </div>
+        <p style="font-size: 0.85rem; color: var(--text-secondary); margin-bottom: 1rem;">
+          Membuktikan bahwa fungsi eksponensiasi modular bekerja murni menggunakan perkalian dan pengkuadratan 
+          berulang tanpa pernah menggunakan operator <code>**</code> untuk bilangan besar.
+        </p>
+
+        <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 1rem; margin-bottom: 1rem;">
+          <div class="form-group">
+            <label for="input-modexp-base">Basis (base):</label>
+            <input type="number" id="input-modexp-base" value="4">
+          </div>
+          <div class="form-group">
+            <label for="input-modexp-exp">Eksponen (exp):</label>
+            <input type="number" id="input-modexp-exp" value="11">
+          </div>
+          <div class="form-group">
+            <label for="input-modexp-mod">Modulus (mod):</label>
+            <input type="number" id="input-modexp-mod" value="23">
+          </div>
+        </div>
+
+        <button id="btn-calc-modexp" class="btn btn-primary" style="margin-bottom: 1rem;">
+          🧮 Hitung Langkah demi Langkah
+        </button>
+
+        <div id="modexp-result-summary" style="font-size: 0.95rem; font-weight: 600; color: #34d399; margin-bottom: 0.5rem; display: none;"></div>
+
+        <table>
+          <thead>
+            <tr>
+              <th>Iterasi (Bit ke-i)</th>
+              <th>Nilai Bit</th>
+              <th>Base Sebelum Kuadrat</th>
+              <th>Operasi Kuadrat: (base^2) mod m</th>
+              <th>Hasil Akumulator (result)</th>
+            </tr>
+          </thead>
+          <tbody id="modexp-steps-tbody" class="mono" style="font-size: 0.8rem;">
+            <tr>
+              <td colspan="5" style="text-align: center; color: var(--text-muted); font-family: var(--font-sans);">
+                Klik tombol di atas untuk menampilkan tabel per bit.
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+
+      <!-- Tab 3: Simulator MITM -->
+      <div class="card" id="tab-content-mitm" style="display: none;">
+        <div class="card-title">
+          <span>⚔️ Simulator Serangan Man-in-the-Middle (MITM) pada DH [BONUS]</span>
+          <span class="badge badge-ATTACK">MITM DEFENSE</span>
+        </div>
+        <p style="font-size: 0.85rem; color: var(--text-secondary); margin-bottom: 1rem;">
+          Diffie-Hellman polos tidak mengautentikasi pihak lawan. Penyerang di tengah jalan (Mallory) dapat mencegat 
+          <code>A</code> dan <code>B</code> lalu menggantinya dengan nilai miliknya sendiri. 
+          Fitur tanda tangan digital ElGamal server <code>ys</code> mendeteksi dan menggagalkan serangan ini.
+        </p>
+
+        <div style="display: flex; gap: 0.75rem; margin-bottom: 1rem; flex-wrap: wrap;">
+          <button id="btn-sim-mitm-plain" class="btn btn-danger">
+            1. Simulasikan Serangan pada DH Polos (Tanpa Tanda Tangan)
+          </button>
+          <button id="btn-sim-mitm-signed" class="btn btn-success">
+            2. Simulasikan Serangan pada DH Terautentikasi Tanda Tangan ElGamal
+          </button>
+        </div>
+
+        <div id="mitm-demo-output" style="display: none; background: rgba(0,0,0,0.3); border: 1px solid var(--border-color); border-radius: 0.5rem; padding: 1rem; font-size: 0.85rem; line-height: 1.6;">
+        </div>
+      </div>
+    </div>
+
+    <!-- Panel Log Kripto Interaktif di Samping Kanan -->
+    <div id="crypto-log-container"></div>
+  </main>
+
+  <script type="module" src="/js/lab.js"></script>
+</body>
+</html>

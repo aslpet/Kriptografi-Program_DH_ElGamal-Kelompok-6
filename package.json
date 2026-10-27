@@ -1,0 +1,14 @@
+{
+  "name": "evoting-dh-elgamal",
+  "version": "1.0.0",
+  "type": "module",
+  "description": "E-Voting Web berbasis Diffie-Hellman dan ElGamal tanpa library kriptografi",
+  "scripts": {
+    "start": "node server/server.js",
+    "test": "node --test test/*.test.js",
+    "check-banned": "node scripts/check-banned.js"
+  },
+  "dependencies": {
+    "express": "^4.21.2"
+  }
+}
